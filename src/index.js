@@ -22,5 +22,5 @@ app.use(express.static('upload'))
 
 //start server on port 3000
 app.listen(port, () => {
-    console.log('server running on port '+port)
+    console.log('server running on port '+ 3000)
 })
