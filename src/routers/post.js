@@ -46,4 +46,11 @@ router.post('/post', auth, upload.single('postPic'),async (req,res) => {
     res.send(response)
 })  
 
+router.post('/like/:id', auth, async (req,res) => {
+    const post = await Post.findById(req.params.id)
+    post.like.push(req.user._id)
+    const response = await post.save()
+
+    res.send(response)
+})
 module.exports = router

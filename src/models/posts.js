@@ -11,7 +11,12 @@ const postSchema = new Schema({
     },
     avatar:{
         type: String
-    }
+    },
+    like: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        unique: true
+    }]
 },{
     timestamps: true
 })
