@@ -8,6 +8,8 @@ const express = require('express')
 const userRouter = require('./routers/user')
 const postRouter = require('./routers/post')
 const commentRouter = require('./routers/comments')
+const replayRouter = require('./routers/replays')
+const followersRouter = require('./routers/userFollowers')
 
 //server config
 const app = express()
@@ -20,6 +22,8 @@ app.use(express.json())
 app.use(userRouter)
 app.use(postRouter)
 app.use(commentRouter)
+app.use(replayRouter)
+app.use(followersRouter)
 
 //specify root of files
 app.use(express.static('upload'))

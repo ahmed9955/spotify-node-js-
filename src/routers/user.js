@@ -8,12 +8,14 @@ const User = require('../models/user')
 
 /*upload image configuration*/
 const multer = require('multer')
+const sendConfirmationEmail = require('../email/email-verification')
+const Code = require('../models/verificationCode')
 const URL = "http://localhost:3000/"
 const storage = multer.diskStorage({
     destination(req,file, cb){
         cb(null,'./upload/profile')
-
     },
+
    async filename(req,file,cb){
         const user = await req.user
         cb(null, user._id + file.mimetype.replace('image/','.').trim())
@@ -54,11 +56,42 @@ router.post('/register', async (req, res) => {
     
 })
 
+router.post('/verification', auth,async (req, res) => {
+
+    const verificationCode = Math.floor(1000 + Math.random() * 9000);
+    const code = new Code({code: verificationCode})
+    await code.save()
+    sendConfirmationEmail(req.user.email, code.code)
+    
+    res.send({
+        success: 'successfully sent!'
+    })
+})
+
+router.post('/confirmation', auth, async (req, res) => {
+    const code = await Code.find({code: Number(req.body.code) })
+    if (code[0]){
+        req.user.verified = true
+        await req.user.save()
+       return res.send(code)
+    }
+    
+    res.send({
+        success:'not found'
+    })
+    
+})
+
 //login into existing account
 router.post('/login',async (req,res) => {
     try {
         const {profileName, email, password} = req.body
         const user = await User.findByCredentials(email, password, profileName)
+        if(!user.verified){
+            return res.send({
+                verified: "email is not verified!"
+            })
+        }
         const token = await user.generateAuthToken()
         const response = await User.JSON(user)
         res.send({response,token})

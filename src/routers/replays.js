@@ -1,15 +1,15 @@
 const express = require('express')
 const router = express.Router()
 const auth = require('../middleware/auth')
-const Post = require('../models/posts')
 const uid = require('uuid-random')
+const Replay = require('../models/replay')
 
 /*upload image configuration*/
 const multer = require('multer')
 const URL = "http://localhost:3000/"
 const storage = multer.diskStorage({
     destination(req,file, cb){
-        cb(null,'./upload/postPic')
+        cb(null,'./upload/commentPic')
 
     },
    async filename(req,file,cb){
@@ -33,26 +33,18 @@ const upload = multer({
 /*upload image configuration*/
 
 
+router.post('/replay/:id', auth, upload.single('replayPic'),async (req,res) => {
 
-router.post('/post', auth, upload.single('postPic'),async (req,res) => {
-    const post = new Post(req.body)
-    post.avatar =  URL + req.file.path.replace('upload/','').trim()
-    post.user = req.user._id
-    await post.save()
-    req.user.post.push(post._id)
-    await req.user.save()
-    const response = await post.save()
-
-    res.send(response)
-})  
-
-router.post('/like/:id', auth, async (req,res) => {
-    const post = await Post.findById(req.params.id)
-    post.like.push(req.user._id)
-    const response = await post.save()
+    const replay = new Replay(req.body)
+    if (req.file){
+        replay.avatar =  URL + req.file.path.replace('upload/','').trim()
+    }    
+    replay.user = req.user._id
+    replay.comment = req.params.id
+    await replay.save()
+    const response = await replay.save()
 
     res.send(response)
 })
-
 
 module.exports = router

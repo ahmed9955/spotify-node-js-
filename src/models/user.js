@@ -80,7 +80,30 @@ const userSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref:'Comment'
         }
-    ]
+    ],
+    followers:[{
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        unique: true
+    }],
+    following:[
+        {
+            type: Schema.Types.ObjectId,
+            ref:'User',
+            unique: true
+        }
+    ],
+    requests:[
+        {
+            type: Schema.Types.ObjectId,
+            ref:'User',
+            unique: true
+        }
+    ],
+    verified:{
+        type: Schema.Types.Boolean,
+        default: false
+    }
 }, {
      timestamps: true 
 })
