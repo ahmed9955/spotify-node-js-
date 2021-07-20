@@ -87,11 +87,11 @@ router.post('/login',async (req,res) => {
     try {
         const {profileName, email, password} = req.body
         const user = await User.findByCredentials(email, password, profileName)
-        if(!user.verified){
-            return res.send({
-                verified: "email is not verified!"
-            })
-        }
+        // if(!user.verified){
+        //     return res.send({
+        //         verified: "email is not verified!"
+        //     })
+        // }
         const token = await user.generateAuthToken()
         const response = await User.JSON(user)
         res.send({response,token})

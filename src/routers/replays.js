@@ -6,6 +6,8 @@ const Replay = require('../models/replay')
 
 /*upload image configuration*/
 const multer = require('multer')
+const { route } = require('./post')
+const { findById } = require('../models/replay')
 const URL = "http://localhost:3000/"
 const storage = multer.diskStorage({
     destination(req,file, cb){
@@ -45,6 +47,23 @@ router.post('/replay/:id', auth, upload.single('replayPic'),async (req,res) => {
     const response = await replay.save()
 
     res.send(response)
+})
+
+router.post('/replay/like/:id', auth,async (req,res)=> {
+    const replay = await Replay.findById(req.params.id)
+    replay.likes.push(req.user._id)
+
+    const response = await replay.save()
+
+    res.send(response)
+})
+
+router.get('/replay/:id', auth, async (req, res) => {
+        
+        const replay = await Replay.find({ comment: req.params.id })
+        .sort({'createdAt': -1})
+
+        res.send(replay)
 })
 
 module.exports = router

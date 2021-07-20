@@ -144,13 +144,38 @@ userSchema.statics.findByCredentials = async function (email, password, profileN
 
 //handle output form
 userSchema.statics.JSON = (response) => {
-    const user = response.toObject()
     
-    delete user.tokens
-    delete user.password
+       const user = response.toObject()
+       delete user.tokens
+       delete user.password
+       delete user.followers
+       delete user.following
+       delete user.post
+       delete user.comment
+       delete user.requests
+       delete user.verified
+    
+       return user
+    }
+    
 
-    return user
+userSchema.statics.HandleJSON = (response) => {
+    
+    return response.map(res => {
+        const user = res.toObject()    
+        delete user.tokens
+        delete user.password
+        delete user.followers
+        delete user.following
+        delete user.post
+        delete user.comment
+        delete user.requests
+        delete user.verified
+
+        return user
+    } )
 }
+
 
 //hash password before saving
 userSchema.pre('save', async function (next){

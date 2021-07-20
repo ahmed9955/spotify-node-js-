@@ -6,6 +6,7 @@ const uid = require('uuid-random')
 
 /*upload image configuration*/
 const multer = require('multer')
+const User = require('../models/user')
 const URL = "http://localhost:3000/"
 const storage = multer.diskStorage({
     destination(req,file, cb){
@@ -52,6 +53,19 @@ router.post('/like/:id', auth, async (req,res) => {
     const response = await post.save()
 
     res.send(response)
+})
+
+router.get('/post/me', auth,async (req,res) => {
+    const post = await Post.find({user: req.user._id})
+    res.send(post.reverse())
+})
+
+router.get('/newposts', auth, async(req, res) => {
+    
+    const posts = await Post.find({user: req.user.following},null,{sort: {createdAt: -1}})
+    
+    res.send(posts)
+  
 })
 
 

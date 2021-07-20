@@ -20,7 +20,11 @@ const replySchema = new Schema({
     },
     avatar:{
         type: String
-    }
+    },
+    likes: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }]
 }, {
     timestamps: true
 })

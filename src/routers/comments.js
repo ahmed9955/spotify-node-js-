@@ -46,4 +46,11 @@ router.post('/comment/:id', auth, upload.single('commentPic'),async (req,res) =>
     res.send(response)
 })  
 
+router.get('/comment/:id', auth, async (req, res) => {
+    const comments = await Comment.find({ post: req.params.id })
+    .sort({'createdAt': -1})
+
+    res.send(comments)
+})
+
 module.exports = router
