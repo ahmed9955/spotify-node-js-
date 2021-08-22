@@ -3,11 +3,15 @@ const router = express.Router()
 const auth = require('../middleware/auth')
 const Post = require('../models/posts')
 const uid = require('uuid-random')
+// const allowCors = require('../middleware/cors-origin')
+
+
+// router.use(allowCors)
 
 /*upload image configuration*/
 const multer = require('multer')
 const User = require('../models/user')
-const URL = "http://localhost:3000/"
+const URL = "http://localhost:2000/"
 const storage = multer.diskStorage({
     destination(req,file, cb){
         cb(null,'./upload/postPic')
@@ -24,27 +28,33 @@ const upload = multer({
         fileSize: 1024 * 1024 * 5
     },
     fileFilter (req, file, cb){
-        const imgType = ['image/jpg' , 'image/jpeg']
+        const imgType = ['image/jpg' , 'image/jpeg', 'image/png']
         if( !imgType.includes(file.mimetype) ){
            return cb(new Error('enter a valid type'),false)
         }
         cb(null,true)
     }
 })
+
 /*upload image configuration*/
+router.post('/post',auth,upload.single('postPic'),async (req,res) => {
+    
+    try {
+    
+        const post = new Post(req.body)
+        post.avatar =  URL + req.file.path.replace('upload/','').trim()
+        post.user = req.user._id
+        await post.save()
+        req.user.post.push(post._id)
+        await req.user.save()
+        await post.save()
+        res.send(post)
 
+    } 
+    catch (e){
+    res.status(500).send(e)
+}
 
-
-router.post('/post', auth, upload.single('postPic'),async (req,res) => {
-    const post = new Post(req.body)
-    post.avatar =  URL + req.file.path.replace('upload/','').trim()
-    post.user = req.user._id
-    await post.save()
-    req.user.post.push(post._id)
-    await req.user.save()
-    const response = await post.save()
-
-    res.send(response)
 })  
 
 router.post('/like/:id', auth, async (req,res) => {

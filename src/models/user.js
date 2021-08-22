@@ -14,10 +14,10 @@ const jwt = require('jsonwebtoken')
 const userSchema = new Schema({
     email:{
         type: String,
+        unique:true,
         required: true,
         trim: true,
         maxlength:50,
-        unique:true,
         validate(email){
             if(!validator.isEmail(email)){
                 throw new Error('please enter a valid email')
@@ -27,7 +27,7 @@ const userSchema = new Schema({
     password: {
         type: String,
         minlength: 8,
-        required: true,
+        // required: true,
         validate (value) {
 
             if (!validator.isStrongPassword(value,{
@@ -45,14 +45,15 @@ const userSchema = new Schema({
     },
     profileName: {
         type: String,
+        unique:true,
         required: true,
         trim:true,
         maxlength:20,
-        unique:true
+        
      },
      gender: {
          type:String,
-         required:true,
+        //  required:true,
          maxlength:10,
          enum: ["male","female"],
      }, 
