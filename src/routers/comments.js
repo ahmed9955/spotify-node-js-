@@ -6,6 +6,7 @@ const uid = require('uuid-random')
 
 /*upload image configuration*/
 const multer = require('multer')
+const Post = require('../models/posts')
 const URL = "http://localhost:3000/"
 const storage = multer.diskStorage({
     destination(req,file, cb){
@@ -20,7 +21,7 @@ const storage = multer.diskStorage({
 const upload = multer({
     storage,
     limits:{
-        fileSize: 1024 * 1024 * 5
+        fileSize: 1024 * 1024 * 20
     },
     fileFilter (req, file, cb){
         const imgType = ['image/jpg' , 'image/jpeg']
@@ -34,16 +35,29 @@ const upload = multer({
 
 
 router.post('/comment/:id', auth, upload.single('commentPic'),async (req,res) => {
+    
+    try{
     const comment = new Comment(req.body)
-    comment.avatar =  URL + req.file.path.replace('upload/','').trim()
     comment.user = req.user._id
     comment.post = req.params.id
     await comment.save()
+    
+    // comment.avatar =  URL + req.file.path.replace('upload/','').trim()
+    
+    const post = await Post.findById(req.params.id)
+    post.comments.push(comment._id)
+    await post.save()
+
     req.user.comment.push(comment._id)
     await req.user.save()
-    const response = await comment.save()
+    await comment.save()
 
     res.send(response)
+    } catch(e){
+    
+        res.status(401).send(e)
+
+    }
 })  
 
 router.get('/comment/:id', auth, async (req, res) => {

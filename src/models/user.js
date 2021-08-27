@@ -149,8 +149,6 @@ userSchema.statics.JSON = (response) => {
        const user = response.toObject()
        delete user.tokens
        delete user.password
-       delete user.followers
-       delete user.following
        delete user.post
        delete user.comment
        delete user.requests

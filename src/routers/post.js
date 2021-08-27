@@ -18,17 +18,23 @@ const storage = multer.diskStorage({
 
     },
    async filename(req,file,cb){
+       if (file.mimetype.includes('image/') ){
         cb(null, uid() + file.mimetype.replace('image/','.').trim())
+       } else {
+
+        cb(null, uid() + file.mimetype.replace('video/','.').trim())
+           
+       }
     },
 })
 
 const upload = multer({
     storage,
     limits:{
-        fileSize: 1024 * 1024 * 5
+        fileSize: 1024 * 1024 * 100
     },
     fileFilter (req, file, cb){
-        const imgType = ['image/jpg' , 'image/jpeg', 'image/png']
+        const imgType = ['image/jpg' , 'image/jpeg', 'image/png', 'video/mp4']
         if( !imgType.includes(file.mimetype) ){
            return cb(new Error('enter a valid type'),false)
         }
@@ -57,16 +63,24 @@ router.post('/post',auth,upload.single('postPic'),async (req,res) => {
 
 })  
 
+
+
 router.post('/like/:id', auth, async (req,res) => {
     const post = await Post.findById(req.params.id)
-    post.like.push(req.user._id)
-    const response = await post.save()
+    const checkUser = post.like.includes(req.user._id)
+    
+    if (!checkUser){
+        post.like.push(req.user._id)
 
-    res.send(response)
+        const response = await post.save()
+        return res.send(response)
+    }
+
 })
 
+
 router.get('/post/me', auth,async (req,res) => {
-    const post = await Post.find({user: req.user._id})
+    const post = await Post.find({user: req.user._id}).populate('user')
     res.send(post.reverse())
 })
 
@@ -78,5 +92,15 @@ router.get('/newposts', auth, async(req, res) => {
   
 })
 
+router.get('/post/:id', auth, async (req, res) => {
+
+    const id = req.params.id
+    const post = await Post.findById(id)
+
+    res.send({
+        likes : post.like.length
+    })
+
+})
 
 module.exports = router

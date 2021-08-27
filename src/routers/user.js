@@ -12,7 +12,7 @@ const multer = require('multer')
 const sendConfirmationEmail = require('../email/email-verification')
 const Code = require('../models/verificationCode')
 const allowCors = require('../middleware/cors-origin')
-const URL = "http://localhost:3000/"
+const URL = "http://localhost:2000/"
 const storage = multer.diskStorage({
     destination(req,file, cb){
         cb(null,'./upload/profile')
@@ -20,17 +20,23 @@ const storage = multer.diskStorage({
 
    async filename(req,file,cb){
         const user = await req.user
+        if(file.mimetype.includes('image/')){
         cb(null, user._id + file.mimetype.replace('image/','.').trim())
+        } else {
+
+            cb(null, user._id + file.mimetype.replace('video/','.').trim())
+
+        }
     },
 })
 
 const upload = multer({
     storage,
     limits:{
-        fileSize: 1024 * 1024 * 5
+        fileSize: 1024 * 1024 * 100
     },
     fileFilter (req, file, cb){
-        const imgType = ['image/jpg' , 'image/jpeg']
+        const imgType = ['image/jpg' , 'image/jpeg','image/png', 'video/mp4' ]
         if( !imgType.includes(file.mimetype) ){
            return cb(new Error('enter a valid type'),false)
         }
@@ -142,10 +148,12 @@ router.get('/me', auth, async (req,res) => {
 //update profile data
 router.patch('/me', auth,async (req, res) => {
     try {
+    
     const updates = Object.keys(req.body)  
     updates.forEach(update => req.user[update] = req.body[update])
     await req.user.save()
     res.send(req.user)
+   
     } catch(e) {
         res.send({error: e.message})
     }
@@ -153,7 +161,7 @@ router.patch('/me', auth,async (req, res) => {
 
 //upload profile picture
 router.post('/avatar', auth,upload.single('avatar'),async (req,res) => {
- 
+
     try{
     const user = await req.user
 
