@@ -48,7 +48,10 @@ router.post('/post',auth,upload.single('postPic'),async (req,res) => {
     try {
     
         const post = new Post(req.body)
-        post.avatar =  URL + req.file.path.replace('upload/','').trim()
+
+        if (req.file){
+            post.avatar =  URL + req.file.path.replace('upload/','').trim()
+        }
         post.user = req.user._id
         await post.save()
         req.user.post.push(post._id)
@@ -66,31 +69,94 @@ router.post('/post',auth,upload.single('postPic'),async (req,res) => {
 
 
 router.post('/like/:id', auth, async (req,res) => {
+    
+    try {
+        const post = await Post.findById(req.params.id)
+        const checkUser = post.like.includes(req.user._id)
+        
+        if (!checkUser){
+            post.like.push(req.user._id)
+    
+            const response = await post.save()
+            return res.send(response)
+
+        } else {
+            return res.send({
+                liked: true
+            })
+        }
+
+    } catch(e) {
+        res.status(400).send(e)
+    }
+    
+
+})
+
+router.post('/dislike/:id', auth, async (req,res) => {
     const post = await Post.findById(req.params.id)
     const checkUser = post.like.includes(req.user._id)
     
-    if (!checkUser){
-        post.like.push(req.user._id)
-
-        const response = await post.save()
-        return res.send(response)
+    
+    if (checkUser){
+        
+        post.like = post.like.filter(id => id.toString() !== req.user._id.toString())
+        console.log(post.like)
+        await post.save()
+        return res.send({
+            success: 'disliked'
+        })
     }
 
 })
 
 
-router.get('/post/me', auth,async (req,res) => {
-    const post = await Post.find({user: req.user._id}).populate('user')
+
+router.get('/post/:id', auth,async (req,res) => {
+    const post = await Post.find({user: req.params.id}).populate('user')
     res.send(post.reverse())
 })
 
 router.get('/newposts', auth, async(req, res) => {
     
-    const posts = await Post.find({user: req.user.following},null,{sort: {createdAt: -1}})
+    const posts = await Post.find({},
+        null,
+    {
+        sort: {
+            createdAt: -1
+        }
+    }).populate('user')
     
-    res.send(posts)
+    res.send(posts.filter(post => 
+        
+        req.user.following.includes( post.user._id ) ||
+
+         post.user._id.toString() === req.user._id.toString()  
+        
+        ))
   
 })
+
+router.get('/newposts/explore', auth, async(req, res) => {
+    
+    const posts = await Post.find({},
+        null,
+    {
+        sort: {
+            createdAt: -1
+        }
+    }).populate('user')
+    
+    res.send(posts.filter(post => 
+        
+        !req.user.following.includes( post.user._id ) ||
+
+         post.user._id.toString() === req.user._id.toString()  
+        
+        ))
+  
+})
+
 
 router.get('/post/:id', auth, async (req, res) => {
 

@@ -85,13 +85,13 @@ const userSchema = new Schema({
     followers:[{
         type: Schema.Types.ObjectId,
         ref: 'User',
-        unique: true
+        unique: false
     }],
     following:[
         {
             type: Schema.Types.ObjectId,
             ref:'User',
-            unique: true
+            unique: false
         }
     ],
     requests:[
@@ -151,8 +151,6 @@ userSchema.statics.JSON = (response) => {
        delete user.password
        delete user.post
        delete user.comment
-       delete user.requests
-       delete user.verified
     
        return user
     }

@@ -114,14 +114,12 @@ router.post('/confirmation', auth, async (req, res) => {
 
 //login into existing account
 router.post('/login',async (req,res) => {
+    
     try {
+
         const {profileName, email, password} = req.body
         const user = await User.findByCredentials(email, password, profileName)
-        if(user.verified === false){
-            return res.send({
-                verified: "email is not verified!"
-            })
-        }
+  
         const token = await user.generateAuthToken()
         const response = await User.JSON(user)
         res.send({response,token})
@@ -179,6 +177,24 @@ router.post('/avatar', auth,upload.single('avatar'),async (req,res) => {
 
 })
 
+//reset password
+router.post('/resetpassword', async (req, res) => {
+
+    try {
+        const user = await User.findOne({email: req.query.email})
+        user.password = req.query.password
+        await user.save()
+        res.send({
+            success: 'password updated'
+        })
+    } catch(e) {
+        res.status(400).send({
+            error: 'not updated'
+        })
+    }
+
+})
+
 //get profile image
 router.get('/avatar', auth,async (req,res) => {
     const user = await req.user
@@ -186,6 +202,15 @@ router.get('/avatar', auth,async (req,res) => {
     res.send({
         avatar: user.avatar
     })
+})
+
+
+//get one user
+router.get('/user/:id', async (req, res) => {
+
+    const user = await User.findById(req.params.id)
+
+    res.send(user)
 })
 
 

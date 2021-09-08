@@ -7,7 +7,8 @@ const uid = require('uuid-random')
 /*upload image configuration*/
 const multer = require('multer')
 const Post = require('../models/posts')
-const URL = "http://localhost:3000/"
+const allowCors = require('../middleware/cors-origin')
+const URL = "http://localhost:2000/"
 const storage = multer.diskStorage({
     destination(req,file, cb){
         cb(null,'./upload/commentPic')
@@ -33,6 +34,7 @@ const upload = multer({
 })
 /*upload image configuration*/
 
+// router.use(allowCors)
 
 router.post('/comment/:id', auth, upload.single('commentPic'),async (req,res) => {
     
@@ -41,9 +43,7 @@ router.post('/comment/:id', auth, upload.single('commentPic'),async (req,res) =>
     comment.user = req.user._id
     comment.post = req.params.id
     await comment.save()
-    
-    // comment.avatar =  URL + req.file.path.replace('upload/','').trim()
-    
+        
     const post = await Post.findById(req.params.id)
     post.comments.push(comment._id)
     await post.save()
@@ -53,6 +53,7 @@ router.post('/comment/:id', auth, upload.single('commentPic'),async (req,res) =>
     await comment.save()
 
     res.send(response)
+    
     } catch(e){
     
         res.status(401).send(e)
@@ -60,9 +61,60 @@ router.post('/comment/:id', auth, upload.single('commentPic'),async (req,res) =>
     }
 })  
 
+
+router.post('/comment/like/:id', auth, async (req,res) => {
+    
+    try {
+        const comment = await Comment.findById(req.params.id)
+        const checkUser = comment.like.includes(req.user._id)
+        
+        if (!checkUser){
+
+            comment.like.push(req.user._id)
+    
+            const response = await comment.save()
+            return res.send(response)
+
+        } else {
+            return res.send({
+                liked: true
+            })
+        }
+
+    } catch(e) {
+        res.status(400).send(e)
+    }
+    
+})
+
+router.post('/comment/dislike/:id', auth, async (req,res) => {
+
+    try{
+    const comment = await Comment.findById(req.params.id)
+    const checkUser = comment.like.includes(req.user._id)
+    
+    
+    if (checkUser){     
+        comment.like = comment.like.filter(id => id.toString() !== req.user._id.toString())
+
+        await comment.save()
+        
+            return res.send({
+            success: 'disliked'
+    })
+    }
+} catch(e) {
+    res.status(400).send(e)
+}
+
+
+})
+
+
+
 router.get('/comment/:id', auth, async (req, res) => {
     const comments = await Comment.find({ post: req.params.id })
-    .sort({'createdAt': -1})
+    .sort({'createdAt': -1}).populate('user')
 
     res.send(comments)
 })

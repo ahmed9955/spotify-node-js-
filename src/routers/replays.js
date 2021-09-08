@@ -8,6 +8,7 @@ const Replay = require('../models/replay')
 const multer = require('multer')
 const { route } = require('./post')
 const { findById } = require('../models/replay')
+const Comment = require('../models/comments')
 const URL = "http://localhost:3000/"
 const storage = multer.diskStorage({
     destination(req,file, cb){
@@ -35,27 +36,62 @@ const upload = multer({
 /*upload image configuration*/
 
 
-router.post('/replay/:id', auth, upload.single('replayPic'),async (req,res) => {
+router.post('/comment/replay/:id', auth, upload.single('replayPic'),async (req,res) => {
 
+    try{
     const replay = new Replay(req.body)
+    const comment = await Comment.findById(req.params.id)
+
     if (req.file){
         replay.avatar =  URL + req.file.path.replace('upload/','').trim()
-    }    
+    }  
+
     replay.user = req.user._id
     replay.comment = req.params.id
+    comment.replays.push(replay._id)
+
     await replay.save()
+    await comment.save()
+
     const response = await replay.save()
 
     res.send(response)
+
+    } catch(e) {
+        res.send(e)
+    }
 })
 
 router.post('/replay/like/:id', auth,async (req,res)=> {
-    const replay = await Replay.findById(req.params.id)
-    replay.likes.push(req.user._id)
 
-    const response = await replay.save()
+    try {
 
-    res.send(response)
+        const replay = await Replay.findById(req.params.id)
+        const checkUser = replay.likes.includes(req.user._id)
+
+        
+        if (!checkUser) {
+
+
+            replay.likes.push(req.user._id)
+    
+            const response = await replay.save()
+            return res.send(response)            
+    
+        } else {
+
+            return res.send({
+                liked: true
+            })
+        }
+    
+
+    } catch(e) {
+
+        res.status(400).send(e)
+
+    }
+
 })
 
 router.get('/replay/:id', auth, async (req, res) => {
@@ -64,6 +100,8 @@ router.get('/replay/:id', auth, async (req, res) => {
         .sort({'createdAt': -1})
 
         res.send(replay)
+
+
 })
 
 module.exports = router

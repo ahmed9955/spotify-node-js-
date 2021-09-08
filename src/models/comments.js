@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const { Schema } = mongoose
 
 const commentSchema = new Schema({
+    
     content: {
         type: String,
     },
@@ -15,7 +16,20 @@ const commentSchema = new Schema({
     },
     avatar:{
         type: String
-    }
+    },
+
+    like: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        unique: true
+    }],
+
+    replays: [{
+        type: Schema.Types.ObjectId,
+        ref:'Replay',
+        unique:true
+    }]
+
 }, {
     timestamps: true
 })
