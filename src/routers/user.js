@@ -2,6 +2,7 @@
 const express = require('express')
 const router = express.Router()
 const validator = require('validator')
+const uuid = require('uuid-random')
 
 //authentication
 const auth = require('../middleware/auth')
@@ -13,6 +14,7 @@ const sendConfirmationEmail = require('../email/email-verification')
 const Code = require('../models/verificationCode')
 const allowCors = require('../middleware/cors-origin')
 const URL = "http://localhost:2000/"
+
 const storage = multer.diskStorage({
     destination(req,file, cb){
         cb(null,'./upload/profile')
@@ -21,10 +23,10 @@ const storage = multer.diskStorage({
    async filename(req,file,cb){
         const user = await req.user
         if(file.mimetype.includes('image/')){
-        cb(null, user._id + file.mimetype.replace('image/','.').trim())
+        cb(null, uuid() + file.mimetype.replace('image/','.').trim())
         } else {
 
-            cb(null, user._id + file.mimetype.replace('video/','.').trim())
+            cb(null, uuid() + file.mimetype.replace('video/','.').trim())
 
         }
     },
@@ -43,6 +45,7 @@ const upload = multer({
         cb(null,true)
     }
 })
+
 /*upload image configuration*/
 
 router.use(allowCors)
@@ -176,6 +179,28 @@ router.post('/avatar', auth,upload.single('avatar'),async (req,res) => {
     }
 
 })
+
+
+//upload portrait
+router.post('/portrait', auth, upload.single('portrait'),async (req,res) => {
+
+    try{
+    const user = await req.user
+
+    user.portrait =  URL + req.file.path.replace('upload/','').trim()
+
+    await req.user.save()
+
+    res.send({
+        portrait: user.portrait
+    })
+
+} catch (e) {
+        res.send(e)
+    }
+
+})
+
 
 //reset password
 router.post('/resetpassword', async (req, res) => {

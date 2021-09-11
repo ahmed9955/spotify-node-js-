@@ -10,6 +10,14 @@ const chatSchema = new Schema({
     },
     message:{
         type: String
+    },
+    color: {
+        type: String
+
+    },
+    fontWeight: {
+        type: String
+
     }
 })
 

@@ -104,4 +104,27 @@ router.get('/replay/:id', auth, async (req, res) => {
 
 })
 
+router.post('/replay/dislike/:id', auth, async (req,res) => {
+
+    try{
+    const replay = await Replay.findById(req.params.id)
+    const checkUser = replay.likes.includes(req.user._id)
+    
+    if (checkUser){     
+        
+        replay.likes = replay.likes.filter(id => id.toString() !== req.user._id.toString())
+
+        await replay.save()
+        
+        return res.send({
+            success: 'disliked'
+    })
+    }
+} catch(e) {
+    res.status(400).send(e)
+}
+
+
+})
+
 module.exports = router

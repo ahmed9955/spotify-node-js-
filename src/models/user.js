@@ -70,6 +70,9 @@ const userSchema = new Schema({
     avatar: {
         type:String
     },
+    portrait: {
+        type:String
+    },
     post:[
         {
             type: Schema.Types.ObjectId,

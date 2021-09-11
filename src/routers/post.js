@@ -169,4 +169,25 @@ router.get('/post/:id', auth, async (req, res) => {
 
 })
 
+
+router.get('/likedposts/:id', async (req, res) => {
+
+    const likedPosts = await Post.find({}).populate('user')
+
+
+    res.send(likedPosts.filter(post => post.like.includes(req.params.id)))
+
+})
+
+router.get('/mediaposts/:id', async (req, res) => {
+
+    const mediaPosts = await Post.find({ user: req.params.id }).populate('user')
+
+
+    res.send(mediaPosts.filter(post => !!post.avatar ))
+
+})
+
+
+
 module.exports = router

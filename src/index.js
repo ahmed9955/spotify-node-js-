@@ -59,12 +59,12 @@ const io = require('socket.io')(http, {
 io.on('connection',  (socket) => {
     
     //send message
-    socket.on('message',async ({sender,reciever,message}) => {
-        console.log({sender,reciever,message})
-        const chat = new Chat({sender,reciever,message})
+    socket.on('message',async ({sender,reciever,message,color, fontWeight}) => {
+        console.log({sender,reciever,message, color, fontWeight})
+        const chat = new Chat({sender,reciever,message, color, fontWeight})
         const result =  await chat.save()
         if (result){
-        io.emit( 'message', { sender, reciever, message } )
+        io.emit( 'message', { sender, reciever, message, color, fontWeight } )
         }
     })
 
@@ -74,11 +74,23 @@ io.on('connection',  (socket) => {
         if (notification === '') return
 
         const notify = new Notifications({sender, reciever, notification})
-            const result = await notify.save()
+        const result = await notify.save()
 
         if(result){
             console.log(sender, reciever, notification)
         }
+        
+    })
+
+    //notification count
+    socket.on('notificationsCount', async (reciever) => {
+
+        const notificationsCount = await Notifications.find({
+            reciever,
+            color: 'skyblue'
+        })
+
+        io.emit('notificationsCount', notificationsCount.length)
         
     })
 

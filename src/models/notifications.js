@@ -10,6 +10,10 @@ const notificationSchema = new Schema({
     },
     notification:{
         type: String
+    },
+    color: {    
+        type: String,
+        default: 'skyblue'
     }
 })
 
