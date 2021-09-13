@@ -16,6 +16,7 @@ const followersRouter = require('./routers/userFollowers')
 const chatRouter = require('./routers/chat')
 const notificationRouter = require('./routers/notifications')
 
+
 //server config
 const app = express()
 

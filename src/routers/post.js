@@ -11,6 +11,7 @@ const uid = require('uuid-random')
 /*upload image configuration*/
 const multer = require('multer')
 const User = require('../models/user')
+const { rawListeners } = require('../models/user')
 const URL = "http://localhost:2000/"
 const storage = multer.diskStorage({
     destination(req,file, cb){
@@ -186,6 +187,31 @@ router.get('/mediaposts/:id', async (req, res) => {
 
     res.send(mediaPosts.filter(post => !!post.avatar ))
 
+})
+
+router.get('/onepost/:id', async (req, res) => {
+
+    const post = await Post.findById(req.params.id).populate('user')
+
+    res.send(post)
+})
+
+router.post('/bookmark/:id' , auth, async(req, res) => {
+
+    const post = await Post.findById(req.params.id)
+
+    post.bookmark.push(req.user._id)
+
+    await post.save()
+
+    res.send(post)
+})
+
+router.get('/bookmark' , auth, async(req, res) => {
+
+    const posts = await Post.find({}).populate('user')
+
+    res.send(posts.filter(post => post.bookmark.includes(req.user._id.toString())))
 })
 
 

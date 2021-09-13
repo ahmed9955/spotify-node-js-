@@ -22,6 +22,11 @@ const postSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref:'Comment',
         unique:true
+    }],
+    bookmark: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        unique: true
     }]
 
 },{

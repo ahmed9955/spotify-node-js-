@@ -96,7 +96,7 @@ router.post('/replay/like/:id', auth,async (req,res)=> {
 
 router.get('/replay/:id', auth, async (req, res) => {
         
-        const replay = await Replay.find({ comment: req.params.id })
+        const replay = await Replay.find({ comment: req.params.id }).populate('user')
         .sort({'createdAt': -1})
 
         res.send(replay)
