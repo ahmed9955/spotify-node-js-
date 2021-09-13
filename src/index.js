@@ -57,30 +57,30 @@ const io = require('socket.io')(http, {
 
 })
 
-io.on('connection',  (socket) => {
-    
+io.on('connection', (socket) => {
+
     //send message
-    socket.on('message',async ({sender,reciever,message,color, fontWeight}) => {
-        console.log({sender,reciever,message, color, fontWeight})
-        const chat = new Chat({sender,reciever,message, color, fontWeight})
-        const result =  await chat.save()
-        if (result){
-        io.emit( 'message', { sender, reciever, message, color, fontWeight } )
+    socket.on('message', async ({ sender, reciever, message, color, fontWeight }) => {
+        console.log({ sender, reciever, message, color, fontWeight })
+        const chat = new Chat({ sender, reciever, message, color, fontWeight })
+        const result = await chat.save()
+        if (result) {
+            io.emit('message', { sender, reciever, message, color, fontWeight })
         }
     })
 
     //push notifacations
-    socket.on('notifications',async ({ sender, reciever, notification }) => {
+    socket.on('notifications', async ({ sender, reciever, notification }) => {
 
         if (notification === '') return
 
-        const notify = new Notifications({sender, reciever, notification})
+        const notify = new Notifications({ sender, reciever, notification })
         const result = await notify.save()
 
-        if(result){
+        if (result) {
             console.log(sender, reciever, notification)
         }
-        
+
     })
 
     //notification count
@@ -92,7 +92,7 @@ io.on('connection',  (socket) => {
         })
 
         io.emit('notificationsCount', notificationsCount.length)
-        
+
     })
 
 })
@@ -102,8 +102,8 @@ io.on('connection',  (socket) => {
 
 //start server on port 2000
 http.listen(port, () => {
-    console.log('server running on port '+ port)
+    console.log('server running on port ' + port)
     io.on('connection', (socket) => {
-        console.log("new connection: ",socket.id)
+        console.log("new connection: ", socket.id)
     })
 })
