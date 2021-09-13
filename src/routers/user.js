@@ -259,5 +259,22 @@ router.post('/me/logout', auth, async (req, res) => {
     })
 })
 
+//search
+router.get('/searchusers', auth,async (req, res) => {
+
+    const users = await User.find({})
+
+    if (req.query.search === ''){
+        return res.send([])
+    }
+    res.send(users.filter(user => 
+        
+        user._id != req.user._id.toString() && 
+        user.profileName.toLowerCase().includes(req.query.search) 
+        && !req.user.following.includes(user._id)
+
+    ))
+})
+
 
 module.exports = router

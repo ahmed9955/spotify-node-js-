@@ -3,8 +3,8 @@ const mailer = require('nodemailer')
 const transporter = mailer.createTransport({
   service: 'hotmail',
   auth: {
-    user: 'tessss999@outlook.com',
-    pass:'01097312566Mobile'
+    user: 'testttt555888@outlook.com',
+    pass:'01097312566Mobile$'
   }
 })
 
@@ -13,7 +13,7 @@ const transporter = mailer.createTransport({
 const sendConfirmationEmail = async (email, code ) => {
   
   const options = {
-    from: 'tessss999@outlook.com',
+    from: 'testttt555888@outlook.com',
     to: `${email}`,
     subject: "Verification mail",
     html: 

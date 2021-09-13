@@ -82,7 +82,7 @@ router.get('/following', auth, async (req, res) => {
     const following = await User.findById(req.user._id)
     .populate('following')
     
-    res.send(User.HandleJSON(following.following))
+    res.send(User.HandleJSON([... new Set(following.following)]))
 })
 
 router.get('/following/:id', auth, async (req, res) => {
@@ -104,7 +104,11 @@ router.get('/users/whotofollow', auth,async (req, res) => {
     const usersToFollow = await User.find({})
     
     const whotofollow = usersToFollow.filter(user => 
-        req.user._id.toString() != user._id )
+        req.user._id.toString() != user._id 
+
+        && !req.user.following.includes(user._id)
+
+        )
     
         
     res.send(shuffle(whotofollow))
