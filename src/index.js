@@ -19,9 +19,6 @@ const notificationRouter = require('./routers/notifications')
 
 //server config
 const app = express()
-
-const os = require('os');
-const { request } = require('express');
 const Chat = require('./models/chat');
 const Notifications = require('./models/notifications');
 const port = process.env.PORT || 2000
